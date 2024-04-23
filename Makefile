@@ -19,4 +19,4 @@ clean:
 	rm -f *.o hello.elf hello.img
 
 run: hello.img
-	qemu-system-riscv64 -M virt -bios opensbi -serial stdio -display none -kernel hello.img
+	qemu-system-riscv64 -machine virt -cpu rv64 -smp 4 -m 128M -nographic -bios none -serial mon:stdio -display none -kernel kernel.elf
