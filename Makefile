@@ -1,22 +1,18 @@
 ARCH = riscv64-elf
 CC = $(ARCH)-gcc
-FLAGS = -nostartfiles -g
 LD = $(ARCH)-ld
 OBJCOPY = $(ARCH)-objcopy
 
-all: clean hello.img
+all: clean kernel.elf
 
-hello.img: hello.elf
-	$(OBJCOPY) hello.elf -O binary --only-section=.text hello.img
+kernel.elf: kernel.o kernel.lds Makefile
+	$(LD) -T kernel.lds --no-warn-rwx-segments -o kernel.elf kernel.o
 
-hello.elf: hello.o linker.ld Makefile
-	$(LD) -T linker.ld --no-warn-rwx-segments -o hello.elf hello.o
-
-hello.o: hello.s
-	$(CC) $(FLAGS) -c $< -o $@
+kernel.o: boot.s
+	$(CC)  -c $< -o $@
 
 clean:
-	rm -f *.o hello.elf hello.img
+	rm -f *.o kernel.o kernel.elf
 
-run: hello.img
+run: kernel.elf
 	qemu-system-riscv64 -machine virt -cpu rv64 -smp 4 -m 128M -nographic -bios none -serial mon:stdio -display none -kernel kernel.elf
